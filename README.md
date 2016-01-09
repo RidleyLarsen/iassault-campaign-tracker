@@ -1,6 +1,7 @@
-# Firebase Print Queue
+# Imperial Assault Campaign Tracker
 
-I built this project to replace a paper sign up sheet for a 3D printer.
+I built this project to track data in my Star Wars: Imperial Assault campaigns.
+I think it will be better than a pen and paper.
 
 It uses firebase to handle the data, Handlebars for templating, and jQuery for other logic.
 
