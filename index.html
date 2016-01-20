@@ -1,80 +1,28 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
+    <meta property="og:type" content="website" />
+    <meta property="og:name" content="Imperial Assault Campaign Tracker" />
+    <meta property="og:url" content="http://iact.ridley.xyz/" />
+    <meta property="og:image" content="css/images/ia_16x9.jpg" />
+    <meta property="og:description" content="Unofficial Online Campaign Tracker for Fantasy Flight Games' Star Wars: Imperial Assault." />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
     <script src="js/handlebars.js"></script>
     <script src="js/settings.js"></script>
-    <script id="player-form-template" type="text/x-handlebars-template">
-      <div class="form-group">
-        <label for="id_name">Player Name:</label>
-        <input type="text" id="id_name" name="name" />
-      </div>
-      <div class="form-group">
-        <label for="id_name">Credits:</label>
-        <input type="number" id="id_name" name="name" />
-      </div>
-    </script>
     <script src="js/project.js"></script>
+    <script src="js/home.js"></script>
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
-    <title>3D Print Queue</title>
+    <title>Imperial Assault Campaign Tracker</title>
   </head>
   <body>
     <div class="container">
       <div class="row">
-        <div class="text-center">
-          <h1>3D Print Queue</h1>
+        <div class="jumbotron text-center">
+          <h1>Star Wars: Imperial Assault<br />Campaign Tracker</h1>
         </div>
-        <div class="col-xs-12 col-sm-6">
-          <div class="row">
-            <div class="col-xs-9 col-xs-push-3">
-              <h1>Join the Queue</h1>
-            </div>
-          </div>
-          <form class="form-horizontal">
-            <div class="form-group">
-              <label for="id_name" class="col-xs-3 control-label">Slack name:</label>
-              <div class="col-xs-9">
-                <input class=" form-control" type="text" placeholder="e.g. @lizlemon" id="id_name">
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="id_project" class="col-xs-3 control-label">Project (Optional):</label>
-              <div class="col-xs-9">
-                <input class="form-control" type="text" placeholder="e.g. mario boo" id="id_project">
-              </div>
-            </div>
-            <div class="form-group">
-                <label for="id_link" class="col-xs-3 control-label">Thingiverse Link (optional):</label>
-                <div class="col-xs-9">
-                  <input class="form-control" type="text" placeholder="e.g. http://www.thingiverse.com/thing:524988" id="id_link">
-                </div>
-            </div>
-            <div class="row">
-              <div class="col-xs-9 col-xs-push-3">
-                <button id="submit" type="button" class="btn btn-primary">Get in the Queue!</button>
-              </div>
-            </div>
-          </form>
-        </div>
-        <div class="col-xs-12 col-sm-6">
-          <div class="row" id="queue">
-            <div class="col-xs-12">
-              <h1>
-                Current Queue:
-              </h1>
-              <table id="table-queue" class="table table-striped">
-                <tr>
-                  <th>Name</th>
-                  <th>Project</th>
-                  <th>Link</th>
-                  <th>Actions</th>
-                </tr>
-              </table>
-              <p id="empty" class="text-center">
-                Looks like the queue is empty. Go ahead and join!
-              </p>
-            </div>
-          </div>
+        <div class="col-xs-12 text-center">
+          <button class="btn btn-primary facebook-login">Facebook Login</button>
         </div>
       </div>
     </div>
