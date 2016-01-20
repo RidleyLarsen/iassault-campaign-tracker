@@ -15,4 +15,8 @@ function handle_auth() {
 
 $(function() {
   handle_auth();
+  $(document).on('click', '.facebook-logout', function () {
+    ref.unauth();
+    handle_auth();
+  });
 });
