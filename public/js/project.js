@@ -5,11 +5,11 @@ function handle_auth() {
   if (auth === null) {
     if (window.location.pathname !== "/") {
       window.location.pathname = "/";
-      return;
     }
-  }
-  if (auth.uid && window.location.pathname === "/") {
-    window.location.pathname = "/campaigns/";
+  } else {
+    if (auth.uid && window.location.pathname === "/") {
+      window.location.pathname = "/campaigns/";
+    }
   }
 }
 
