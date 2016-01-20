@@ -2,8 +2,11 @@ var ref = new Firebase(FIREBASE_URL);
 
 function handle_auth() {
   var auth = ref.getAuth();
-  if (auth === null && window.location.pathname !== "/") {
-    window.location.pathname = "/";
+  if (auth === null) {
+    if (window.location.pathname !== "/") {
+      window.location.pathname = "/";
+      return;
+    }
   }
   if (auth.uid && window.location.pathname === "/") {
     window.location.pathname = "/campaigns/";
