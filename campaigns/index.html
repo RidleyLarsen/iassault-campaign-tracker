@@ -12,10 +12,11 @@
     <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
     <title>Campaigns - Imperial Assault Campaign Tracker</title>
     <script id="campaign-row-template" type="text/x-handlebars-template">
-      <tr>
+      <tr data-fbkey="{{ key }}">
         <td>{{ name }}</td>
         <td>{{ date }}</td>
-        <td>{{#each players}}<strong>{{ this.name }}</strong> - {{ this.character }}{{#unless @last }},{{/unless}} {{/each}}</td>
+        <td>{{#each players}}{{ this.name }}{{#unless @last }},{{/unless}}  {{/each}}</td>
+        <td><button class="remove-campaign btn btn-danger btn-xs" type="button"><i class="fa fa-trash"></i></button></td>
       </tr>
     </script>
     <script id="add-player-template" type="text/x-handlebars-template">
@@ -44,6 +45,7 @@
         var campaignRef = userRef.child('campaigns');
         campaignRef.on('child_added', function (childSnapshot, prevChildKey) {
           data = childSnapshot.val();
+          data.key = childSnapshot.key();
           var template = Handlebars.compile($('#campaign-row-template').html());
           $('table.campaigns').append($(template(data)));
         });
@@ -61,6 +63,9 @@
             campaign.date = $('#id_date').val();
             players = []
             $('.player-form').each(function (elt) {
+              if ($(this).find('.player-name').val() === "") {
+                return;
+              }
               players.push({
                 'name': $(this).find('.player-name').val(),
                 'character': $(this).find('.character-name').val()
@@ -68,6 +73,14 @@
             });
             campaign.players = players;
             campaignRef.push(campaign);
+            $('.modal').modal('hide');
+          });
+          $(document).on('click', '.remove-campaign', function () {
+            var key = $(this).parents('tr').attr('data-fbkey');
+            var thisCampaignRef = campaignRef.child(key);
+            console.log(key, thisCampaignRef);
+            thisCampaignRef.remove();
+            $(this).parents('tr').remove();
           });
         });
       }
@@ -128,7 +141,7 @@
     <div class="container-fluid">
       <div class="row">
         <div class="sidebar col-xs-2 col-sm-2">
-          <img class="img img-responsive" src="https://images-cdn.fantasyflightgames.com/filer_public/63/ee/63eece28-c1e3-470f-8f89-f4c436d9e6e0/swi01-logo.png">
+          <img class="img img-responsive" src="https://images-cdn.fantasyflightgames.com/filer_public/63/ee/63eece28-c1e3-470f-8f89-f4c436d9e6e0/swi01-logo.png" alt="Imperial Assault Logo">
           <ul class="list-unstyled">
             <li class="active"><i class="fa fa-map"></i><span class="hidden-xs"> Campaigns</span></li>
             <li><i class="fa fa-users"></i><span class="hidden-xs"> Players</span></li>
@@ -146,7 +159,7 @@
           </div>
           <div class="col-xs-12">
             <table class="table campaigns">
-              <tr><th>Name</th><th>Date</th><th>Players</th></tr>
+              <tr><th>Name</th><th>Date</th><th>Players</th><td></td></tr>
             </table>
           </div>
         </div>
