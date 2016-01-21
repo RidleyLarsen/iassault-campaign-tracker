@@ -1,6 +1,9 @@
 var ref = new Firebase(FIREBASE_URL);
 
 function handle_auth() {
+  if (window.location.protocol == "file:") {
+    return;
+  }
   var auth = ref.getAuth();
   if (auth === null) {
     if (window.location.pathname !== "/") {
