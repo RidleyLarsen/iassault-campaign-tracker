@@ -6,6 +6,7 @@
     <meta property="og:image" content="http://ridleylarsen.github.io/iassault-campaign-tracker/css/images/ia_16x9.jpg" />
     <meta property="og:description" content="Unofficial Online Campaign Tracker for Fantasy Flight Games' Star Wars: Imperial Assault." />
     <meta property="fb:app_id" content="171976443165784" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
     <script src="js/handlebars.js"></script>
@@ -14,12 +15,33 @@
     <script src="js/home.js"></script>
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
     <title>Imperial Assault Campaign Tracker</title>
+    <style>
+      .jumbotron h1 {
+        font-size: 2em;
+      }
+      @media only screen and (min-width: 768px) {
+        .jumbotron img {
+          position: absolute;
+          left: 0;
+          transform: translateY(-30%);
+        }
+      }
+      @media only screen and (max-width: 767px) {
+        .jumbotron h1.text-right {
+          padding: 15px;
+          text-align: center !important;
+        }
+      }
+    </style>
   </head>
   <body>
     <div class="container">
       <div class="row">
         <div class="jumbotron text-center">
-          <h1>Star Wars: Imperial Assault<br />Campaign Tracker</h1>
+          <div class="col-xs-12 col-sm-3">
+            <img class="pull-left img img-responsive" src="https://images-cdn.fantasyflightgames.com/filer_public/63/ee/63eece28-c1e3-470f-8f89-f4c436d9e6e0/swi01-logo.png">
+          </div>
+          <h1 class="text-right">Star Wars: Imperial Assault Campaign Tracker</h1>
         </div>
         <div class="col-xs-12 text-center">
           <button class="btn btn-primary facebook-login">Facebook Login</button>
