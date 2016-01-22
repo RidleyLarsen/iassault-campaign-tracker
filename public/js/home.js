@@ -9,7 +9,7 @@ $(function () {
         window.location.pathname = "/campaigns/";
       }
     }, {
-      scope: "email"
+      scope: "email,public_profile"
     });
   });
 });

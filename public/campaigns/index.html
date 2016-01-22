@@ -47,9 +47,11 @@
           data = childSnapshot.val();
           data.key = childSnapshot.key();
           var template = Handlebars.compile($('#campaign-row-template').html());
-          $('table.campaigns').append($(template(data)));
+          $('table.campaigns tbody').append($(template(data)));
         });
         $(function () {
+          $('.account-info img').attr('src', auth.facebook.profileImageURL);
+          $('.account-info span').text(auth.facebook.cachedUserProfile.first_name)
           $('.add-campaign').on('click', function () {
             $('.modal').modal();
           });
@@ -91,6 +93,14 @@
         height: 100vh;
         background: rgba(0, 0, 0, 0.6);
       }
+      .sidebar .account-info {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        padding: 15px;
+        color: #eaeaea;
+        background: rgba(0, 0, 0, 0.1);
+      }
       .sidebar li {
         display: block;
         padding: 15px;
@@ -109,12 +119,16 @@
       .sidebar li span {
         padding-left: 5px;
       }
-      .sidebar img {
+      .sidebar img.logo {
         padding-left: 30px;
         padding-right: 30px;
         padding-top: 10px;
         padding-bottom: 10px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      .account-info img {
+        width: 30px;
+        margin-right: 1px;
       }
       .content .heading span button {
         margin-left: 5px;
@@ -126,8 +140,12 @@
       button#add-player {
         margin-top: 10px;
       }
+      table.campaigns tbody tr:hover {
+        background: rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+      }
       @media only screen and (max-width: 768px) {
-        .sidebar img {
+        .sidebar img.logo {
           padding-left: 3px;
           padding-right: 3px;
         }
@@ -141,13 +159,16 @@
     <div class="container-fluid">
       <div class="row">
         <div class="sidebar col-xs-2 col-sm-2">
-          <img class="img img-responsive" src="https://images-cdn.fantasyflightgames.com/filer_public/63/ee/63eece28-c1e3-470f-8f89-f4c436d9e6e0/swi01-logo.png" alt="Imperial Assault Logo">
+          <img class="img img-responsive logo" src="https://images-cdn.fantasyflightgames.com/filer_public/63/ee/63eece28-c1e3-470f-8f89-f4c436d9e6e0/swi01-logo.png" alt="Imperial Assault Logo">
           <ul class="list-unstyled">
             <li class="active"><i class="fa fa-map"></i><span class="hidden-xs"> Campaigns</span></li>
             <li><i class="fa fa-users"></i><span class="hidden-xs"> Players</span></li>
             <li><i class="fa fa-bar-chart"></i><span class="hidden-xs"> Stats</span></li>
             <li><i class="fa fa-cog"></i><span class="hidden-xs"> Account</span></li>
           </ul>
+          <div class="account-info text-center">
+            <img src=""> Logged in as <span class="account-name"></span>.
+          </div>
         </div>
         <div class="content col-xs-10 col-sm-10">
           <div class="col-xs-12">
@@ -159,7 +180,8 @@
           </div>
           <div class="col-xs-12">
             <table class="table campaigns">
-              <tr><th>Name</th><th>Date</th><th>Players</th><td></td></tr>
+              <thead><tr><th>Name</th><th>Date</th><th>Players</th><th></th></tr></thead>
+              <tbody></tbody>
             </table>
           </div>
         </div>
