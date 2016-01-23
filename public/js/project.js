@@ -1,5 +1,7 @@
 var ref = new Firebase(FIREBASE_URL);
 
+toastr.options.positionClass = "toast-bottom-right";
+
 function handle_auth() {
   if (window.location.protocol == "file:") {
     return;
