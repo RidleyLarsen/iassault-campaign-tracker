@@ -5,11 +5,13 @@
     <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <script src="../js/handlebars.js"></script>
+    <script src="../js/toastr.min.js"></script>
     <script src="../js/settings.js"></script>
     <script src="../js/project.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="../css/toastr.min.css" />
     <title>Campaigns - Imperial Assault Campaign Tracker</title>
     <script id="campaign-row-template" type="text/x-handlebars-template">
       <tr class="campaign-row" data-fbkey="{{ key }}">
@@ -39,19 +41,52 @@
       </div>
     </script>
     <script id="campaign-template" type="text/x-handlebars-template">
-      <div style="margin-top: 15px;">
-        <button type="button" class="btn btn-info btn-back-to-campaigns">
-          <i class="fa fa-arrow-left"></i> Back to Campaigns
-        </button>
-      </div>
-      <h1>{{ name }}</h1>
-      <div>
-        <label for="players">Players:</label>
-        <ul name="players">
-          {{#each players }}
-          <li>{{ this.name }} &dash; {{ this.character }}</li>
-          {{/each}}
-        </ul>
+      <div class="col-xs-12">
+          <div style="margin-top: 15px;">
+          <button type="button" class="btn btn-info btn-back-to-campaigns">
+            <i class="fa fa-arrow-left"></i> Back to Campaigns
+          </button>
+        </div>
+        <h1>{{ name }}</h1>
+        <p>Started on <em>{{ date }}</em></p>
+        <h2>
+          Players
+          <button class="btn btn-primary campaign-player-edit pull-right">
+            <i class="fa fa-pencil"></i> <span>Edit Players</span>
+          </button>
+        </h2>
+        <div>
+          <table class="table campaign-players">
+            <thead>
+              <th>Name</th><th>Character</th><th>Credits/Influence</th><th>XP</th><th></th>
+            </thead>
+            <tbody>
+              {{#each players }}
+              <tr class="player">
+                <td>
+                  <input name="name" class="hidden form-control" type="text" value="{{ this.name }}" />
+                  <span>{{ this.name }}</span>
+                </td>
+                <td>
+                  <input name="character" class="hidden form-control" value="{{ this.character }}" />
+                  <span>{{ this.character }}</span>
+                </td>
+                <td>
+                  <input name="credits" class="hidden form-control" type="number" value="{{ this.credits }}" />
+                  <span>{{ this.credits }}</span>
+                </td>
+                <td>
+                  <input name="xp" class="hidden form-control" type="number" value="{{ this.xp }}" />
+                  <span>{{ this.xp }}</span>
+                </td>
+                <td>
+                  <button class="btn btn-danger btn-xs campaign-player-delete hidden"><i class="fa fa-trash"></i> Delete</button>
+                </td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
       </div>
     </script>
     <script>
@@ -60,7 +95,9 @@
         $('.content').addClass('content-hidden');
         $('.campaign').removeClass('campaign-hidden');
         $('.campaign').html($(template(campaigns[id])));
+        current_campaign_id = id;
       }
+      var current_campaign_id;
       var campaigns = {};
       var body_content;
       var auth = ref.getAuth();
@@ -73,6 +110,10 @@
           campaigns[data.key] = data;
           var template = Handlebars.compile($('#campaign-row-template').html());
           $('table.campaigns tbody').append($(template(data)));
+        });
+        campaignRef.on('child_removed', function (childSnapshot, prevChildKey) {
+          key = childSnapshot.key();
+          $('tr[data-fbkey="' + data.key + '"]').remove();
         });
         campaignRef.on('child_changed', function (childSnapshot, prevChildKey) {
           data = childSnapshot.val();
@@ -108,6 +149,9 @@
             });
             campaign.players = players;
             campaignRef.push(campaign);
+            toastr['success']("You added " + campaign.name + ".");
+            $('.player-form').remove();
+            $('.modal input').val('');
             $('.modal').modal('hide');
           });
           $(document).on('click', '.campaign-row', function () {
@@ -117,10 +161,10 @@
             $('.campaign').addClass('campaign-hidden');
             $('.content').removeClass('content-hidden');
           });
-          $(document).on('click', '.remove-campaign', function () {
+          $(document).on('click', '.remove-campaign', function (e) {
+            e.stopPropagation();
             var key = $(this).parents('tr').attr('data-fbkey');
             var thisCampaignRef = campaignRef.child(key);
-            console.log(key, thisCampaignRef);
             thisCampaignRef.remove();
             $(this).parents('tr').remove();
           });
@@ -129,6 +173,34 @@
             $('.' + $(this).attr('data-page')).removeClass('page-hidden');
             $('.menu li').removeClass('active');
             $(this).addClass('active')
+          });
+          $(document).on('click', '.campaign-player-edit', function () {
+            $('.campaign-players td input').removeClass('hidden');
+            $('.campaign-players td span').addClass('hidden');
+            $(this).removeClass('btn-primary').addClass('btn-success');
+            $(this).find('span').text('Save Players');
+            $(this).find('i').removeClass('fa-pencil').addClass('fa-save');
+            $(this).removeClass('campaign-player-edit').addClass('campaign-player-save');
+          });
+          $(document).on('click', '.campaign-player-save', function () {
+            $('.campaign-players .player').each(function (i) {
+              var player_index = i;
+              var name = $(this).find('input[name="name"]');
+              $(this).find('input').each(function (j) {
+                campaigns[current_campaign_id].players[player_index][$(this).attr('name')] = $(this).val();
+                $(this).parent().find('span').text($(this).val());
+              });
+            });
+            $('.campaign-players td span').removeClass('hidden');
+            $('.campaign-players td input').addClass('hidden');
+            $(this).removeClass('btn-success').addClass('btn-primary');
+            $(this).find('span').text('Edit Players');
+            $(this).find('i').removeClass('fa-save').addClass('fa-pencil');
+            $(this).removeClass('campaign-player-save').addClass('campaign-player-edit');
+
+            var thisCampaignRef = campaignRef.child(current_campaign_id);
+            thisCampaignRef.set(campaigns[current_campaign_id]);
+            toastr["success"]("Characters updated successfully.")
           });
         });
       }
@@ -194,6 +266,10 @@
       .content-container {
         position: relative;
       }
+      .page > div {
+        width: 100%;
+        margin-left: -15px;
+      }
       .content, .campaign, .page {
         position: absolute;
         top: 0;
@@ -250,7 +326,7 @@
               </h1>
             </div>
             <div class="col-xs-12">
-              <table class="table campaigns">
+              <table class="table table-striped campaigns">
                 <thead><tr><th>Name</th><th>Date</th><th>Players</th><th></th></tr></thead>
                 <tbody></tbody>
               </table>
