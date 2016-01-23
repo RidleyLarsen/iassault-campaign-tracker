@@ -12,7 +12,7 @@
     <link rel="stylesheet" type="text/css" href="../css/font-awesome.min.css" />
     <title>Campaigns - Imperial Assault Campaign Tracker</title>
     <script id="campaign-row-template" type="text/x-handlebars-template">
-      <tr data-fbkey="{{ key }}">
+      <tr class="campaign-row" data-fbkey="{{ key }}">
         <td>{{ name }}</td>
         <td>{{ date }}</td>
         <td>{{#each players}}{{ this.name }}{{#unless @last }},{{/unless}}  {{/each}}</td>
@@ -38,7 +38,31 @@
         </div>
       </div>
     </script>
+    <script id="campaign-template" type="text/x-handlebars-template">
+      <div style="margin-top: 15px;">
+        <button type="button" class="btn btn-info btn-back-to-campaigns">
+          <i class="fa fa-arrow-left"></i> Back to Campaigns
+        </button>
+      </div>
+      <h1>{{ name }}</h1>
+      <div>
+        <label for="players">Players:</label>
+        <ul name="players">
+          {{#each players }}
+          <li>{{ this.name }} &dash; {{ this.character }}</li>
+          {{/each}}
+        </ul>
+      </div>
+    </script>
     <script>
+      function get_campaign(id) {
+        var template = Handlebars.compile($('#campaign-template').html());
+        $('.content').addClass('content-hidden');
+        $('.campaign').removeClass('campaign-hidden');
+        $('.campaign').html($(template(campaigns[id])));
+      }
+      var campaigns = {};
+      var body_content;
       var auth = ref.getAuth();
       if (auth !== null && auth !== undefined) {
         var userRef = ref.child(auth.uid);
@@ -46,9 +70,18 @@
         campaignRef.on('child_added', function (childSnapshot, prevChildKey) {
           data = childSnapshot.val();
           data.key = childSnapshot.key();
+          campaigns[data.key] = data;
           var template = Handlebars.compile($('#campaign-row-template').html());
           $('table.campaigns tbody').append($(template(data)));
         });
+        campaignRef.on('child_changed', function (childSnapshot, prevChildKey) {
+          data = childSnapshot.val();
+          data.key = childSnapshot.key();
+          campaigns[data.key] = data;
+          if (!$('.campaign').hasClass('campaign-hidden')) {
+            get_campaign(data.key);
+          }
+        })
         $(function () {
           $('.account-info img').attr('src', auth.facebook.profileImageURL);
           $('.account-info span').text(auth.facebook.cachedUserProfile.first_name)
@@ -77,6 +110,13 @@
             campaignRef.push(campaign);
             $('.modal').modal('hide');
           });
+          $(document).on('click', '.campaign-row', function () {
+            get_campaign($(this).attr('data-fbkey'));
+          });
+          $(document).on('click', '.btn-back-to-campaigns', function () {
+            $('.campaign').addClass('campaign-hidden');
+            $('.content').removeClass('content-hidden');
+          });
           $(document).on('click', '.remove-campaign', function () {
             var key = $(this).parents('tr').attr('data-fbkey');
             var thisCampaignRef = campaignRef.child(key);
@@ -84,11 +124,18 @@
             thisCampaignRef.remove();
             $(this).parents('tr').remove();
           });
+          $(document).on('click', '.sidebar .menu li', function () {
+            $('.page').addClass('page-hidden')
+            $('.' + $(this).attr('data-page')).removeClass('page-hidden');
+            $('.menu li').removeClass('active');
+            $(this).addClass('active')
+          });
         });
       }
     </script>
     <style>
       .sidebar {
+        position: fixed;
         padding: 0;
         height: 100vh;
         background: rgba(0, 0, 0, 0.6);
@@ -144,6 +191,28 @@
         background: rgba(0, 0, 0, 0.1);
         cursor: pointer;
       }
+      .content-container {
+        position: relative;
+      }
+      .content, .campaign, .page {
+        position: absolute;
+        top: 0;
+        opacity: 1;
+        transition: 500ms transform, 250ms opacity;
+        transform: translateY(0);
+        z-index: 3;
+      }
+      .content-hidden, .campaign-hidden, .page-hidden {
+        z-index: 4;
+        opacity: 0;
+      }
+      .content-hidden, .page-hidden {
+        transform: translateY(100vh);
+      }
+      .campaign-hidden {
+        transform: translateY(-100vh);
+      }
+
       @media only screen and (max-width: 768px) {
         .sidebar img.logo {
           padding-left: 3px;
@@ -160,31 +229,37 @@
       <div class="row">
         <div class="sidebar col-xs-2 col-sm-2">
           <img class="img img-responsive logo" src="https://images-cdn.fantasyflightgames.com/filer_public/63/ee/63eece28-c1e3-470f-8f89-f4c436d9e6e0/swi01-logo.png" alt="Imperial Assault Logo">
-          <ul class="list-unstyled">
-            <li class="active"><i class="fa fa-map"></i><span class="hidden-xs"> Campaigns</span></li>
-            <li><i class="fa fa-users"></i><span class="hidden-xs"> Players</span></li>
-            <li><i class="fa fa-bar-chart"></i><span class="hidden-xs"> Stats</span></li>
-            <li><i class="fa fa-cog"></i><span class="hidden-xs"> Account</span></li>
+          <ul class="list-unstyled menu">
+            <li data-page="campaigns-container" class="active"><i class="fa fa-map"></i><span class="hidden-xs"> Campaigns</span></li>
+            <li data-page="players-container"><i class="fa fa-users"></i><span class="hidden-xs"> Players</span></li>
+            <li data-page="stats-container"><i class="fa fa-bar-chart"></i><span class="hidden-xs"> Stats</span></li>
+            <li data-page="account-container"><i class="fa fa-cog"></i><span class="hidden-xs"> Account</span></li>
           </ul>
           <div class="account-info text-center">
             <img src=""> Logged in as <span class="account-name"></span>.
           </div>
         </div>
-        <div class="content col-xs-10 col-sm-10">
-          <div class="col-xs-12">
-            <h1 class="heading">
-              Your Campaigns
-              <span class="pull-right"><button class="btn btn-primary facebook-logout"><span>Log Out</span></button></span>
-              <span class="pull-right"><button class="btn btn-success add-campaign"><i class="fa fa-plus"></i><span> Add a Campaign</span></button></span>
-            </h1>
-          </div>
-          <div class="col-xs-12">
-            <table class="table campaigns">
-              <thead><tr><th>Name</th><th>Date</th><th>Players</th><th></th></tr></thead>
-              <tbody></tbody>
-            </table>
+        <div class="page campaigns-container col-xs-10 col-sm-10 col-xs-push-2">
+          <div class="campaign campaign-hidden"></div>
+          <div class="content">
+            <div class="col-xs-12">
+              <h1 class="heading">
+                Your Campaigns
+                <span class="pull-right"><button class="btn btn-primary facebook-logout"><span>Log Out</span></button></span>
+                <span class="pull-right"><button class="btn btn-success add-campaign"><i class="fa fa-plus"></i><span> Add a Campaign</span></button></span>
+              </h1>
+            </div>
+            <div class="col-xs-12">
+              <table class="table campaigns">
+                <thead><tr><th>Name</th><th>Date</th><th>Players</th><th></th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
           </div>
         </div>
+        <div class="page page-hidden players-container col-xs-10 col-sm-10 col-xs-push-2"><h1>Players</h1></div>
+        <div class="page page-hidden stats-container col-xs-10 col-sm-10 col-xs-push-2"><h1>Stats</h1></div>
+        <div class="page page-hidden account-container col-xs-10 col-sm-10 col-xs-push-2"><h1>My Account</h1></div>
       </div>
     </div>
     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
